@@ -1,0 +1,120 @@
+// Quick Interior Cost Calculator for Rose Interiors
+
+import wixLocation from 'wix-location';
+
+$w.onReady(function () {
+    // Set up dropdown options
+    $w('#dropdown1').options = [
+        { label: 'Apartment', value: 'Apartment' },
+        { label: 'Villa', value: 'Villa' },
+        { label: 'Independent House', value: 'Independent House' },
+        { label: 'Studio', value: 'Studio' }
+    ];
+    $w('#dropdown2').options = [
+        { label: '1 BHK', value: '1 BHK' },
+        { label: '2 BHK', value: '2 BHK' },
+        { label: '3 BHK', value: '3 BHK' },
+        { label: '4 BHK+', value: '4 BHK+' }
+    ];
+    $w('#dropdown3').options = [
+        { label: '500–800 sq.ft', value: '500–800' },
+        { label: '800–1200 sq.ft', value: '800–1200' },
+        { label: '1200–1800 sq.ft', value: '1200–1800' },
+        { label: '1800–2500 sq.ft', value: '1800–2500' },
+        { label: 'Above 2500 sq.ft', value: 'Above 2500' }
+    ];
+    $w('#checkboxGroup1').options = [
+        { label: 'Modular Kitchen', value: 'Modular Kitchen' },
+        { label: 'Wardrobes & Storage', value: 'Wardrobes & Storage' },
+        { label: 'False Ceiling', value: 'False Ceiling' },
+        { label: 'Painting', value: 'Painting' },
+        { label: 'Electrical & Lighting', value: 'Electrical & Lighting' },
+        { label: 'Full Home Décor', value: 'Full Home Décor' }
+    ];
+
+    // Hide result and CTA elements initially
+    $w('#textEstimate').hide();
+    $w('#textNote').hide();
+    $w('#buttonConsult').hide();
+    $w('#buttonEmail').hide();
+
+    // Style section and elements for modern, minimal, rose-gold accent
+    $w('#section6').style.backgroundColor = "#fff";
+    $w('#section6').style.borderRadius = "16px";
+    $w('#section6').style.borderColor = "#b76e79";
+    $w('#section6').style.borderWidth = "2px";
+    $w('#section6').style.borderStyle = "solid";
+
+    $w('#button1').style.backgroundColor = "#b76e79";
+    $w('#button1').style.color = "#fff";
+    $w('#buttonConsult').style.backgroundColor = "#b76e79";
+    $w('#buttonConsult').style.color = "#fff";
+    $w('#buttonEmail').style.backgroundColor = "#fff";
+    $w('#buttonEmail').style.color = "#b76e79";
+    $w('#buttonEmail').style.borderColor = "#b76e79";
+    $w('#buttonEmail').style.borderWidth = "2px";
+    $w('#buttonEmail').style.borderStyle = "solid";
+    $w('#textEstimate').style.color = "#b76e79";
+    $w('#textNote').style.color = "#b76e79";
+
+    // Calculate button click handler
+    $w('#button1').onClick(() => {
+        // Get user selections
+        const homeType = $w('#dropdown1').value;
+        const interiorStyle = $w('#radioGroup1').value;
+        const bedrooms = $w('#dropdown2').value;
+        const areaRange = $w('#dropdown3').value;
+        const selectedWorks = $w('#checkboxGroup1').value || [];
+
+        // Calculation logic
+        const baseRates = {
+            'Basic': 900,
+            'Standard': 1300,
+            'Premium': 1800,
+            'Luxury': 2300
+        };
+        const areaMidpoints = {
+            '500–800': 650,
+            '800–1200': 1000,
+            '1200–1800': 1500,
+            '1800–2500': 2100,
+            'Above 2500': 2800
+        };
+        const workAddons = {
+            'Modular Kitchen': 60000,
+            'Wardrobes & Storage': 50000,
+            'False Ceiling': 40000,
+            'Painting': 30000,
+            'Electrical & Lighting': 25000,
+            'Full Home Décor': 75000
+        };
+        let baseRate = baseRates[interiorStyle] || 900;
+        let area = areaMidpoints[areaRange] || 650;
+        let addons = selectedWorks.reduce((sum, work) => sum + (workAddons[work] || 0), 0);
+        let totalCost = (area * baseRate) + addons;
+
+        // Format as INR
+        let formattedCost = '₹' + totalCost.toLocaleString('en-IN');
+
+        // Show result
+        $w('#textEstimate').text = `Your approximate cost is ${formattedCost}`;
+        $w('#textEstimate').show();
+        $w('#textNote').text = "This is an approximate value. Final quote available after site visit.";
+        $w('#textNote').show();
+        $w('#buttonConsult').show();
+        $w('#buttonEmail').show();
+    });
+
+    // CTA button handlers
+    $w('#buttonConsult').onClick(() => {
+        // Example: navigate to contact page
+        wixLocation.to('/contact');
+    });
+    $w('#buttonEmail').onClick(() => {
+        // Open mail client with estimate
+        let textEstimate = $w('#textEstimate').text;
+        let subject = encodeURIComponent('My Rose Interiors Estimate');
+        let body = encodeURIComponent(textEstimate + '\n\nThis is an approximate value. Final quote available after site visit.');
+        wixLocation.to(`mailto:?subject=${subject}&body=${body}`);
+    });
+});
